@@ -5,6 +5,8 @@ pub enum ByteCode {
     LoadVal(i64),
     WriteVar(char),
     ReadVar(char),
+    LoopVal(u64),
+    End,
     Add,
     Mul,
 	Div,
@@ -22,6 +24,15 @@ pub struct Variable {
 pub struct Program {
     pub bytecodes: Vec<ByteCode>,
     pub stack: Vec<Variable>,
+    pub in_loop: bool,
+    pub loop_op: Loop,
+}
+#[derive(Clone)]
+pub struct Loop {
+    pub bytecodes: Vec<ByteCode>,
+    pub stack : Vec<Variable>,
+    pub first_read: bool,
+    pub count: u64,
 }
 
 #[derive(Debug)]

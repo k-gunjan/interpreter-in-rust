@@ -1,4 +1,4 @@
-use crate::types::{ByteCode, Program, ProgramError, Result, Variable};
+use crate::types::{ByteCode, Program, ProgramError, Result, Variable, Loop};
 
 macro_rules! do_op {
     ($code:expr, $op:tt) => {{
@@ -49,20 +49,86 @@ macro_rules! do_op {
 ///    "not interpreted properly"
 ///   );
 ///   ```
-pub fn interpret(bytecodes: Vec<ByteCode>) -> Result<Variable> {
+// pub fn interpret(bytecodes: Vec<ByteCode>) -> Result<Variable> {
+//     let mut code = Program {
+//         bytecodes,
+//         stack: Vec::new(),
+//         in_loop: false,
+//     };
+
+// 	// iterate and match the bytecode vector
+//     for op in code.bytecodes {
+//         if let Some(err) = match op {
+//             ByteCode::LoadVal(i) => {
+//                 code.stack.push(Variable {
+//                     variable: None,
+//                     value: i,
+//                 });
+//                 None
+//             },
+//             ByteCode::WriteVar(c) => {
+//                 let loaded_value = code.stack.pop();
+//                 if let Some(v) = loaded_value {
+//                     code.stack.push(Variable {
+//                         variable: Some(c),
+//                         value: v.value,
+//                     })
+//                 }
+//                 None
+//             },
+//             ByteCode::ReadVar(c) => {
+//                 let read_value = code.stack.iter().find(|&&x| x.variable == Some(c));
+//                 if let Some(v) = read_value {
+//                     let var = v.clone();
+//                     code.stack.push(Variable {
+//                         variable: var.variable,
+//                         value: var.value,
+//                     })
+//                 }
+//                 None
+//             },
+//             ByteCode::Mul => do_op!(code, *),
+// 			ByteCode::Div => do_op!(code, /),
+//             ByteCode::Add => do_op!(code, +),
+// 			ByteCode::Sub => do_op!(code, -),
+//             ByteCode::Return => break,
+//         } {
+//             return Err(err);
+//         }
+//     }
+
+//     if let Some(v) = code.stack.pop() {
+//         Ok(v)
+//     } else {
+//         Err(ProgramError::StackUnderflow)
+//     }
+// }
+
+pub fn interpret_with_loop(bytecodes: Vec<ByteCode>) -> Result<Variable> {
     let mut code = Program {
         bytecodes,
         stack: Vec::new(),
+        in_loop:false,
+        loop_op: Loop {
+            bytecodes: Vec::new(),
+            stack: Vec::new(),
+            first_read: false,
+            count: 0,
+        },
     };
 
 	// iterate and match the bytecode vector
     for op in code.bytecodes {
         if let Some(err) = match op {
             ByteCode::LoadVal(i) => {
-                code.stack.push(Variable {
-                    variable: None,
-                    value: i,
-                });
+                if code.in_loop {
+                    code.loop_op.bytecodes.push(op);
+                } else {
+                    code.stack.push(Variable {
+                        variable: None,
+                        value: i,
+                    });
+                }
                 None
             },
             ByteCode::WriteVar(c) => {
@@ -84,6 +150,18 @@ pub fn interpret(bytecodes: Vec<ByteCode>) -> Result<Variable> {
                         value: var.value,
                     })
                 }
+                None
+            },
+            ByteCode::LoopVal(i) => {
+                code.in_loop = true;
+                code.loop_op.first_read= true;
+                code.loop_op.count= i;
+                None
+            },
+            ByteCode::End => {
+                code.in_loop = false;
+                code.loop_op.first_read= false;
+                code.loop_op.count -= 1;
                 None
             },
             ByteCode::Mul => do_op!(code, *),
