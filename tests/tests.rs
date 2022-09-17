@@ -1,4 +1,4 @@
-use interpreter::interpret::interpret_with_loop;
+use interpreter::interpret::interpret_with_loop1;
 use interpreter::types::ByteCode;
 
 #[cfg(test)]
@@ -9,7 +9,7 @@ mod interpreter_tests {
     fn test_err_no_value_loaded() {
         use ByteCode::*;
         assert!(
-            interpret_with_loop(vec![Return]).is_err(),
+            interpret_with_loop1(vec![Return], &mut Vec::new(), 1).is_err(),
             "Should return StackUnderflow error"
         );
     }
@@ -21,7 +21,7 @@ mod interpreter_tests {
         let test_load_value_and_return = vec![LoadVal(2), Return];
 
         assert_eq!(
-            interpret_with_loop(test_load_value_and_return).unwrap().value,
+            interpret_with_loop1(test_load_value_and_return, &mut Vec::new(), 1).unwrap().value,
             2,
             "Should return the chosen loaded value"
         );
@@ -37,7 +37,7 @@ mod interpreter_tests {
         let test_load_two_values_multiply_return = vec![LoadVal(a), LoadVal(b), Mul, Return];
 
         assert_eq!(
-            interpret_with_loop(test_load_two_values_multiply_return)
+            interpret_with_loop1(test_load_two_values_multiply_return, &mut Vec::new(), 1)
                 .unwrap()
                 .value,
             a * b,
@@ -58,7 +58,7 @@ mod interpreter_tests {
         let test_load_two_values_multiply_return = vec![LoadVal(a), LoadVal(b), Div, Return];
 
         assert_eq!(
-            interpret_with_loop(test_load_two_values_multiply_return)
+            interpret_with_loop1(test_load_two_values_multiply_return, &mut Vec::new(), 1)
                 .unwrap()
                 .value,
             a / b,
@@ -79,7 +79,7 @@ mod interpreter_tests {
         let test_load_two_values_multiply_return = vec![LoadVal(a), LoadVal(b), Sub, Return];
 
         assert_eq!(
-            interpret_with_loop(test_load_two_values_multiply_return)
+            interpret_with_loop1(test_load_two_values_multiply_return, &mut Vec::new(), 1)
                 .unwrap()
                 .value,
             a - b,
@@ -98,7 +98,7 @@ mod interpreter_tests {
         let var = 'c';
 
         let test_write_value = vec![LoadVal(val), WriteVar(var), Return];
-        let test_write_value_result = interpret_with_loop(test_write_value).unwrap();
+        let test_write_value_result = interpret_with_loop1(test_write_value, &mut Vec::new(), 1).unwrap();
 
         assert_eq!(
             test_write_value_result.variable,
@@ -142,7 +142,7 @@ mod interpreter_tests {
         ];
 
         assert_eq!(
-            interpret_with_loop(test_arithmetic_written_values).unwrap().value,
+            interpret_with_loop1(test_arithmetic_written_values, &mut Vec::new(), 1).unwrap().value,
             4,
             "not interpreted properly"
         );
@@ -158,7 +158,7 @@ mod interpreter_tests {
             LoadVal(1),
             // write x = 1
             WriteVar('x'),
-            LoopVal(10),
+            LoopVal(3),
             // read x = 1
             ReadVar('x'),
             // load 1
@@ -170,7 +170,7 @@ mod interpreter_tests {
         ];
 
         assert_eq!(
-            interpret_with_loop(test_loop_operation).unwrap().value,
+            interpret_with_loop1(test_loop_operation, &mut Vec::new(), 1).unwrap().value,
             4,
             "not interpreted properly"
         );

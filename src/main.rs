@@ -1,42 +1,36 @@
-macro_rules! create_function {
-    // This macro takes an argument of designator `ident` and
-    // creates a function named `$func_name`.
-    // The `ident` designator is used for variable/function names.
-    ($func_name:ident) => {
-        fn $func_name() {
-            // The `stringify!` macro converts an `ident` into a string.
-            println!("You called {:?}()",
-                     stringify!($func_name));
-        }
-    };
-}
+use interpreter::interpret::interpret_with_loop1;
+use interpreter::types::ByteCode;
 
-// Create functions named `foo` and `bar` with the above macro.
-create_function!(foo);
-create_function!(bar);
-
-macro_rules! print_result {
-    // This macro takes an expression of type `expr` and prints
-    // it as a string along with its result.
-    // The `expr` designator is used for expressions.
-    ($expression:expr) => {
-        // `stringify!` will convert the expression *as it is* into a string.
-        println!("{:?} = {:?}",
-                 stringify!($expression),
-                 $expression);
-    };
-}
 
 fn main() {
-    foo();
-    bar();
 
-    print_result!(1u32 + 1);
+    println!("__________________________________");
 
-    // Recall that blocks are expressions too!
-    print_result!({
-        let x = 1u32;
+    test_loop_operation();
+}
 
-        x * x + 2 * x - 1
-    });
+fn test_loop_operation() {
+    use ByteCode::*;
+
+    let test_loop_operation = vec![
+        // load 1
+        LoadVal(1),
+        // write x = 1
+        WriteVar('x'),
+        LoopVal(5),
+        // read x = 1
+        ReadVar('y'),
+        // load 1
+        LoadVal(1),
+        // Add (will apply to last 2 values in stack) -> 1 + 1 = 2 (new value in stack)
+        Add,
+        End,
+        Return,
+    ];
+
+    assert_eq!(
+        interpret_with_loop1(test_loop_operation, &mut Vec::new(), 1).unwrap().value,
+        10,
+        "not interpreted properly"
+    );
 }

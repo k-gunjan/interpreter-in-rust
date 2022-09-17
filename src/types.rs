@@ -1,6 +1,6 @@
 use std::result;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum ByteCode {
     LoadVal(i64),
     WriteVar(char),
@@ -30,8 +30,6 @@ pub struct Program {
 #[derive(Clone)]
 pub struct Loop {
     pub bytecodes: Vec<ByteCode>,
-    pub stack : Vec<Variable>,
-    pub first_read: bool,
     pub count: u64,
 }
 
