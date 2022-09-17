@@ -37,7 +37,7 @@ macro_rules! do_op {
 ///    ];
 ///
 ///   assert_eq!(
-///    interpret_with_loop(test_arithmetic_written_values).unwrap().value,
+///    interpret_with_loop(test_arithmetic_written_values, 1).unwrap().value,
 ///    11,
 ///    "not interpreted properly"
 ///   );
