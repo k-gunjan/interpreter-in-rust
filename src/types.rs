@@ -9,8 +9,8 @@ pub enum ByteCode {
     End,
     Add,
     Mul,
-	Div,
-	Sub,
+    Div,
+    Sub,
     Return,
 }
 
