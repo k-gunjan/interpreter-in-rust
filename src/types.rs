@@ -7,8 +7,8 @@ pub enum ByteCode {
     ReadVar(char),
     Add,
     Mul,
-	Div,
-	Sub,
+    Div,
+    Sub,
     Return,
 }
 
